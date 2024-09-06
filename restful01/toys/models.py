@@ -18,5 +18,5 @@ class Toy(models.Model):
     class Meta:
         ordering = ["name",]
         
-    def __srt__ (self):
-        return self.name
+    def __str__ (self):
+        return f"{self.name} {self.description}"
