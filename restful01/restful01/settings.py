@@ -27,7 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS":"drones.pagination.LimitOffsetPaginationWithUpperBound", 
+    "PAGE_SIZE":4,
+    "DEFAULT_FILTER_BACKENDS":(
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+        "rest_framework.filters.SearchFilter",
+    )
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'toys.apps.ToysConfig',
     'drones.apps.DronesConfig',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
