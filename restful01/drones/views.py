@@ -1,13 +1,14 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, viewsets, permissions
+from rest_framework.authentication import TokenAuthentication
 from drones.models import DroneCategory, Drone
 from drones.serializers import DroneCategorySerializer
 from drones.serializers import DroneSerializer
 from drones.models import Pilot, Competition
 from drones.serializers import PilotSerializer
 from drones.serializers import PilotCompetitionSerializer
-from rest_framework import viewsets
 from drones.filters import CompetitionFilter
+from drones import custom_permissions
 
 # Create your views here.
 
@@ -32,12 +33,21 @@ class DroneList(generics.ListCreateAPIView):
         "name",
         "manufacturing_date",
     )
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        custom_permissions.IsCurrentUserOwnerOrReadOnly,
+    )
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
     
 class DroneDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Drone.objects.all()
     serializer_class = DroneSerializer
     name = "drone-detail"
-    
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        custom_permissions.IsCurrentUserOwnerOrReadOnly,
+    )
     
 
 class PilotList(generics.ListCreateAPIView):
@@ -47,11 +57,16 @@ class PilotList(generics.ListCreateAPIView):
     filterset_fields = ("gender", "races_count",)
     search_fields = ("^name", )
     ordering_fields = ("^name", "races_count")
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
 
 class PilotDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Pilot.objects.all()
     serializer_class = PilotSerializer
     name = "pilot-detail"
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 class CompetitionList(generics.ListCreateAPIView):
