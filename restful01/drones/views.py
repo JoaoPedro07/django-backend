@@ -9,6 +9,7 @@ from drones.serializers import PilotSerializer
 from drones.serializers import PilotCompetitionSerializer
 from drones.filters import CompetitionFilter
 from drones import custom_permissions
+from rest_framework.throttling import ScopedRateThrottle
 
 # Create your views here.
 
@@ -23,6 +24,8 @@ class DroneCategoryViewSet(viewsets.ModelViewSet):
 class DroneList(generics.ListCreateAPIView):
     queryset = Drone.objects.all()
     serializer_class = DroneSerializer
+    throttle_scope = "drones"
+    throttle_classes = (ScopedRateThrottle,)
     name = "drone_list"
     filterset_fields = (
         "drone_category",
@@ -37,8 +40,11 @@ class DroneList(generics.ListCreateAPIView):
         permissions.IsAuthenticatedOrReadOnly,
         custom_permissions.IsCurrentUserOwnerOrReadOnly,
     )
+    
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    
     
 class DroneDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Drone.objects.all()
@@ -49,21 +55,27 @@ class DroneDetail(generics.RetrieveUpdateDestroyAPIView):
         custom_permissions.IsCurrentUserOwnerOrReadOnly,
     )
     
+    throttle_scope = "drones"
+    throttle_classes = (ScopedRateThrottle,)
 
 class PilotList(generics.ListCreateAPIView):
     queryset = Pilot.objects.all()
     serializer_class = PilotSerializer
+    throttle_scope = "pilots"
+    throttle_classes = (ScopedRateThrottle,)
     name = "pilot_list"
     filterset_fields = ("gender", "races_count",)
     search_fields = ("^name", )
     ordering_fields = ("^name", "races_count")
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,) 
     permission_classes = (permissions.IsAuthenticated,)
 
 
 class PilotDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Pilot.objects.all()
     serializer_class = PilotSerializer
+    throttle_scope = "pilots"
+    throttle_classes = (ScopedRateThrottle,)
     name = "pilot-detail"
     authentication_classes = (TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)

@@ -27,5 +27,6 @@ urlpatterns = [
     path("competitions/<int:pk>", 
          views.CompetitionDetail.as_view(), 
          name=views.CompetitionDetail.name),
+    
 ]
 urlpatterns += router.urls
